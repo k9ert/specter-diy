@@ -208,3 +208,25 @@ def format_addr(addr, letters=6, words=3, eol="\n", space=" "):
         letters=(words * (letters + 1)),
         separator=eol,
     )
+
+
+_translations = {}
+_current_lang = 'en'
+
+def load_language(lang_code):
+    global _translations, _current_lang
+    _translations.clear()
+    try:
+        # Using frozen modules instead of file system
+        mod = __import__('lang_' + lang_code)
+        _translations.update(mod.translations)
+        _current_lang = lang_code
+        print("Loaded language: {}".format(lang_code))
+    except ImportError:
+        _translations.clear()
+    print(_translations)
+
+def t(t_id):
+    if t_id not in _translations:
+        print("Warning: missing translation for '{}' in language {}".format(t_id, _current_lang))
+    return _translations.get(t_id, t_id)

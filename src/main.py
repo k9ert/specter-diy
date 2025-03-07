@@ -11,6 +11,8 @@ import platform
 from helpers import load_apps
 from app import BaseApp
 import display
+from gui.common import *
+
 
 def main(apps=None, network="main", keystore_cls=None):
     """
@@ -18,6 +20,8 @@ def main(apps=None, network="main", keystore_cls=None):
     network: default network to operate
     keystores: list of KeyStore classes that can be used
     """
+    # Load i18n translations
+    load_language("de")
     # Init display first as it also inits the SDRAM
     display.init(False)
     # create virtual file system /sdram

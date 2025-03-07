@@ -209,9 +209,9 @@ class PinScreen(Screen):
     network = None
     CANCEL_VALUE = "*"
 
-    def __init__(self, title="Enter your PIN code", note=None, get_word=None, subtitle=None, with_cancel=False):
+    def __init__(self, title=t("Enter your PIN code"), note=None, get_word=None, subtitle=None, with_cancel=False):
         super().__init__()
-        self.title = add_label(title, scr=self, y=PADDING, style="title")
+        self.title = add_label(t(title), scr=self, y=PADDING, style="title")
         if subtitle is not None:
             lbl = add_label(subtitle, scr=self, style="hint")
             lbl.set_recolor(True)
