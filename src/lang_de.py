@@ -9,4 +9,4 @@ translations = {
   "Success!", "PIN code is successfully changed!": "Erfolgreich!", "PIN Code wurde erfolgreich geaendert!",
   "Warning": "Warnung",
   "You need to confirm your PIN code ": "Du musst deinen PIN Code bestaetigen",
-  
+}  
