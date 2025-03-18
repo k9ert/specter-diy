@@ -1,5 +1,5 @@
 from .core import KeyStore, KeyStoreError
-from platform import CriticalErrorWipeImmediately
+from platform import CriticalErrorErrorWipeImmediately
 import platform
 from rng import get_random_bytes
 import hmac
@@ -22,7 +22,9 @@ class RAMKeyStore(KeyStore):
 
     storage_button = None
 
+    # Constructor
     def __init__(self):
+        super().__init__()
         # bip39 mnemonic
         self.mnemonic = None
         # root xprv (derived from mnemonic, password)
@@ -87,7 +89,7 @@ class RAMKeyStore(KeyStore):
         flag = sig[64]
         return ec.Signature(sig[:64]), flag
 
-    def save_aead(self, path, adata=b"", plaintext=b"", key=None):
+    def save_aead(self, path, adata=b"", plaintext=b="", key=None):
         """Encrypts and saves plaintext and associated data to file"""
         if key is None:
             key = self.idkey
@@ -304,19 +306,21 @@ class RAMKeyStore(KeyStore):
         Async version of the PIN screen.
         Waits for an event that is set in the callback.
         """
+        # Apply t() function
+        title = t(title)
 
         scr = PinScreen(
-            title=t(title),
-            note=t("Do you recognize these words?"),
+            title=title,
+            note="Do you recognize these words?",
             get_word=self.get_auth_word,
-            subtitle=t(self.pin_subtitle),
+            subtitle=self.pin_subtitle,
             with_cancel=with_cancel
         )
         return await self.show(scr)
 
     @property
     def pin_subtitle(self):
-        return t("using #%s %s #") % (type(self).COLOR, type(self).NAME.lower())
+        return "using #%s %s #" % (type(self).COLOR, type(self).NAME.lower())
 
 
     async def setup_pin(self, get_word=None):
@@ -326,18 +330,18 @@ class RAMKeyStore(KeyStore):
         If not -> try again
         """
         scr = PinScreen(
-            title=t("Choose your PIN code"),
-            note=t("Remember these words," "they will stay the same on this device."),
+            title="Choose your PIN code",
+            note="Remember these words, they will stay the same on this device.",
             get_word=self.get_auth_word,
-            subtitle=t(self.pin_subtitle),
+            subtitle=self.pin_subtitle,
         )
         pin1 = await self.show(scr)
 
         scr = PinScreen(
-            title=t("Confirm your PIN code"),
-            note=t("Remember these words," "they will stay the same on this device."),
+            title="Confirm your PIN code",
+            note="Remember these words, they will stay the same on this device.",
             get_word=self.get_auth_word,
-            subtitle=t(self.pin_subtitle),
+            subtitle=self.pin_subtitle,
         )
         pin2 = await self.show(scr)
 
@@ -345,7 +349,7 @@ class RAMKeyStore(KeyStore):
         if pin1 == pin2:
             return pin1
         # if not - show an error
-        await self.show(Alert(t("Error!"), t("PIN codes are different!")))
+        await self.show(Alert("Error!", "PIN codes are different!"))
         return await self.setup_pin(get_word)
 
     async def change_pin(self):
