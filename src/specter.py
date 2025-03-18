@@ -23,6 +23,9 @@ from gui.screens.mnemonic import MnemonicPrompt
 from helpers import gen_mnemonic, fix_mnemonic
 from errors import BaseError
 
+# Import the necessary functions from common
+import lvgl as lv
+from gui.common import add_button, add_language_selection_button
 
 class SpecterError(BaseError):
     NAME = "Specter error"

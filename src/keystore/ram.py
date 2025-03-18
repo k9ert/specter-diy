@@ -1,5 +1,5 @@
 from .core import KeyStore, KeyStoreError
-from platform import CriticalErrorWipeImmediately
+from platform import CriticalErrorErrorWipeImmediately
 import platform
 from rng import get_random_bytes
 import hmac
@@ -22,7 +22,9 @@ class RAMKeyStore(KeyStore):
 
     storage_button = None
 
+    # Constructor
     def __init__(self):
+        super().__init__()
         # bip39 mnemonic
         self.mnemonic = None
         # root xprv (derived from mnemonic, password)
@@ -87,7 +89,7 @@ class RAMKeyStore(KeyStore):
         flag = sig[64]
         return ec.Signature(sig[:64]), flag
 
-    def save_aead(self, path, adata=b"", plaintext=b"", key=None):
+    def save_aead(self, path, adata=b"", plaintext=b="", key=None):
         """Encrypts and saves plaintext and associated data to file"""
         if key is None:
             key = self.idkey
@@ -304,6 +306,8 @@ class RAMKeyStore(KeyStore):
         Async version of the PIN screen.
         Waits for an event that is set in the callback.
         """
+        # Apply t() function
+        title = t(title)
 
         scr = PinScreen(
             title=title,
@@ -327,7 +331,7 @@ class RAMKeyStore(KeyStore):
         """
         scr = PinScreen(
             title="Choose your PIN code",
-            note="Remember these words," "they will stay the same on this device.",
+            note="Remember these words, they will stay the same on this device.",
             get_word=self.get_auth_word,
             subtitle=self.pin_subtitle,
         )
@@ -335,7 +339,7 @@ class RAMKeyStore(KeyStore):
 
         scr = PinScreen(
             title="Confirm your PIN code",
-            note="Remember these words," "they will stay the same on this device.",
+            note="Remember these words, they will stay the same on this device.",
             get_word=self.get_auth_word,
             subtitle=self.pin_subtitle,
         )
