@@ -33,6 +33,7 @@ class FlashKeyStore(RAMKeyStore):
     storage_button = "Flash storage"
     load_button = "Load key from internal memory"
 
+    # Constructor
     def __init__(self):
         super().__init__()
         self._is_locked = True
@@ -312,19 +313,27 @@ class FlashKeyStore(RAMKeyStore):
                  "Give each seed a unique name!",
             suggestion="",
     ):
-        scr = InputScreen(t(title), t(note), suggestion, min_length=1, strip=True)
+        # Apply t() function
+        title = t(title)
+        note = t(note) if note else note
+        suggestion = t(suggestion)
+
+        scr = InputScreen(title, note, suggestion, min_length=1, strip=True)
         await self.show(scr)
         return scr.get_value()
 
 
     async def storage_menu(self, title="Manage keys on internal flash"):
         """Manage storage, return True if new key was loaded"""
+        # Apply t() function
+        title = t(title)
+
         buttons = [
             # id, text
-            (None, t(title)),
-            (0, t("Save key")),
-            (1, t("Load key")),
-            (2, t("Delete key")),
+            (None, title),
+            (0, "Save key"),
+            (1, "Load key"),
+            (2, "Delete key"),
         ]
 
         # we stay in this menu until back is pressed
@@ -339,16 +348,16 @@ class FlashKeyStore(RAMKeyStore):
                 filename = await self.save_mnemonic()
                 if filename:
                     await self.show(
-                        Alert("Success!", "Your key is stored now.\n\nName: %s" % filename, button_text="OK")
+                        Alert("Success!", "Your key is stored now.\n\nName: %s") % filename, button_text="OK")
                     )
             elif menuitem == 1:
                 if await self.load_mnemonic():
                     await self.show(
-                        Alert(t("Success!"), t("Your key is loaded."), button_text="OK")
+                        Alert("Success!", "Your key is loaded."), button_text="OK")
                     )
                 return True
             elif menuitem == 2:
                 if await self.delete_mnemonic():
                     await self.show(
-                        Alert(t("Success!"), t("Your key is deleted."), button_text="OK")
+                        Alert("Success!", "Your key is deleted."), button_text="OK")
                     )
