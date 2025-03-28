@@ -23,6 +23,7 @@ class RAMKeyStore(KeyStore):
     storage_button = None
 
     def __init__(self):
+        super().__init__()
         # bip39 mnemonic
         self.mnemonic = None
         # root xprv (derived from mnemonic, password)
@@ -304,6 +305,8 @@ class RAMKeyStore(KeyStore):
         Async version of the PIN screen.
         Waits for an event that is set in the callback.
         """
+        # Apply t() function
+        title = t(title)
 
         scr = PinScreen(
             title=title,

@@ -312,6 +312,12 @@ class FlashKeyStore(RAMKeyStore):
                  "Give each seed a unique name!",
             suggestion="",
     ):
+        
+        # Apply t() function
+        title = t(title)
+        note = t(note) if note else note
+        suggestion = t(suggestion)
+        
         scr = InputScreen(title, note, suggestion, min_length=1, strip=True)
         await self.show(scr)
         return scr.get_value()
@@ -319,6 +325,9 @@ class FlashKeyStore(RAMKeyStore):
 
     async def storage_menu(self, title="Manage keys on internal flash"):
         """Manage storage, return True if new key was loaded"""
+        # Apply t() function
+        title = t(title)
+
         buttons = [
             # id, text
             (None, title),

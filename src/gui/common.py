@@ -5,6 +5,7 @@ import math
 from micropython import const
 import gc
 from .components import QRCode, styles
+import lvgl as lv
 
 PADDING = const(20)
 BTN_HEIGHT = const(70)
@@ -201,10 +202,80 @@ def separate(addr, letters=6, separator=" "):
         + extra
     )
 
-
 def format_addr(addr, letters=6, words=3, eol="\n", space=" "):
     return separate(
         separate(addr, letters=letters, separator=space),
         letters=(words * (letters + 1)),
         separator=eol,
     )
+
+_translations = {}
+_current_lang = 'en'
+
+def load_language(lang_code):
+    global _translations, _current_lang
+    _translations.clear()
+    try:
+        # Using frozen modules instead of file system
+        mod = __import__('lang_' + lang_code)
+        _translations.update(mod.translations)
+        _current_lang = lang_code
+        print("Loaded language: {}".format(lang_code))
+    except ImportError:
+        _translations.clear()
+    print(_translations)
+
+def t(t_id):
+    if t_id not in _translations:
+        print("Warning: missing translation for '{}' in language {}".format(t_id, _current_lang))
+    return _translations.get(t_id, t_id)
+    
+
+# Define a function to handle language selection
+def language_selection_callback(event):
+    # Logic for language selection goes here
+    print("Language selection button pressed")
+    # You can add code here to display a list of languages and handle the selection
+
+def add_label(text, y=PADDING, scr=None, style=None, width=None):
+    """Helper functions that creates a title-styled label"""
+    if width is None:
+        width = HOR_RES - 2 * PADDING
+    if scr is None:
+        scr = lv.scr_act()
+    lbl = lv.label(scr)
+    lbl.set_text(text)
+    if style in styles:
+        lbl.set_style(0, styles[style])
+    lbl.set_long_mode(lv.label.LONG.BREAK)
+    lbl.set_width(width)
+    lbl.set_x((HOR_RES - width) // 2)
+    lbl.set_align(lv.label.ALIGN.CENTER)
+    lbl.set_y(y)
+    return lbl
+
+def add_button(text=None, callback=None, scr=None, y=700):
+    """Helper function that creates a button with a text label"""
+    if scr is None:
+        scr = lv.scr_act()
+    btn = lv.btn(scr)
+    btn.set_width(HOR_RES - 2 * PADDING)
+    btn.set_height(BTN_HEIGHT)
+
+    if text is not None:
+        lbl = lv.label(btn)
+        lbl.set_text(text)
+        lbl.set_align(lv.label.ALIGN.CENTER)
+
+    btn.align(scr, lv.ALIGN.IN_TOP_MID, 0, 0)
+    btn.set_y(y)
+
+    if callback is not None:
+        btn.set_event_cb(callback)
+
+    return btn
+
+# Add the language selection button to the start page (pinscreen)
+def add_language_selection_button():
+    scr = lv.scr_act()
+    add_button(text="Language Selection", callback=language_selection_callback, scr=scr, y=200)

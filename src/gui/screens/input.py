@@ -116,6 +116,12 @@ class InputScreen(Screen):
             strip=False,
     ):
         super().__init__()
+
+        # Apply t() function
+        title = t(title)
+        note = t(note) if note else note
+        suggestion = t(suggestion)
+
         self.title = add_label(title, scr=self, style="title")
         self.min_length = min_length
         self.max_length = max_length
@@ -211,6 +217,13 @@ class PinScreen(Screen):
 
     def __init__(self, title="Enter your PIN code", note=None, get_word=None, subtitle=None, with_cancel=False):
         super().__init__()
+
+        # Apply t() function
+        title = t(title)
+        note = t(note) if note else note
+        subtitle = t(subtitle) if subtitle else subtitle
+
+        self.title = add_label(title, scr=self, y=PADDING, style="title")
         self.title = add_label(title, scr=self, y=PADDING, style="title")
         if subtitle is not None:
             lbl = add_label(subtitle, scr=self, style="hint")
@@ -338,6 +351,10 @@ class DerivationScreen(Screen):
 
     def __init__(self, title="Enter derivation path"):
         super().__init__()
+
+        # Apply t() function
+        title = t(title)
+        
         self.title = add_label(title, scr=self, y=PADDING, style="title")
         self.kb = lv.btnm(self)
         self.kb.set_map(self.PATH_CHARSET)
@@ -418,6 +435,11 @@ class NumericScreen(Screen):
             current_val='0'
     ):
         super().__init__()
+
+        # Apply t() function
+        title = t(title)
+        note = t(note) if note else note
+
         if note is None:
             note = "Current account number: %s" % current_val
         self.title = add_label(title, scr=self, y=PADDING, style="title")

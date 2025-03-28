@@ -503,6 +503,7 @@ class Specter:
             (None, "Global settings"),
         ]
         if hasattr(self.keystore, "lock"):
+            buttons.extend([(888, "Select language")])
             buttons.extend([(777, "Change PIN code")])
         buttons += [
             (456, "Reboot"),
@@ -537,6 +538,8 @@ class Specter:
                 return
             elif menuitem == 777:
                 await self.keystore.change_pin()
+            elif menuitem == 888:
+                await self.my_submenu()  # Untermenü aufrufen
                 return
             elif menuitem == 1:
                 await self.communication_settings()
@@ -544,6 +547,30 @@ class Specter:
                 print(menuitem)
                 raise SpecterError("Not implemented")
 
+    async def my_submenu(self):
+        buttons = [
+            (1, "English"),
+            (2, "Deutsch"),
+            (255, "Back"),
+        ]
+        while True:
+            menuitem = await self.gui.menu(
+                buttons,
+                title="Select your language",
+                note="Choose an option.",
+                last=(255, None)
+            )
+            if menuitem == 255:
+                return  # Zurück zum vorherigen Menü
+            elif menuitem == 1:
+                await self.gui.alert("English", "You selected english.")
+            elif menuitem == 2:
+                await self.gui.alert("Deutsch", "You selected deutsch.")
+            else:
+                print(menuitem)
+                raise SpecterError("Not implemented")
+
+    
     @property
     def fingerprint(self):
         return self.keystore.fingerprint
