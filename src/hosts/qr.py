@@ -106,6 +106,56 @@ class QRHost(Host):
     @property
     def CONT_MODE(self):
         return self.MASK | 2
+    
+    # Add these constants at the top of the file with the other address constants
+    PRODUCT_MODEL_ADDR = b"\x00\xE0"
+    HARDWARE_VERSION_ADDR = b"\x00\xE1"
+
+    # Add a dictionary to map hardware version bytes to version strings
+    HARDWARE_VERSION_MAP = {
+        0x64: "V1.00",
+        0x6E: "V1.10",
+        0x78: "V1.20",
+        0x82: "V1.30",
+        0x8C: "V1.40"
+    }
+
+    @property
+    def info(self):
+        # Get current mode setting
+        mode_val = self.get_setting(SETTINGS_ADDR)
+        if mode_val is None:
+            return "Scanner not connected or not responding"
+        
+        # Format the current mode information
+        mode_info = "Current Mode: 0x%02x" % mode_val
+        if mode_val == self.CMD_MODE:
+            mode_info += " (Command Mode)"
+        elif mode_val == self.CONT_MODE:
+            mode_info += " (Continuous Mode)"
+        
+        # Get product model
+        product_model = self.get_setting(self.PRODUCT_MODEL_ADDR)
+        model_info = "Product Model: "
+        if product_model is not None:
+            model_info += "0x%02x" % product_model
+        else:
+            model_info += "Unknown"
+        
+        # Get hardware version
+        hw_version = self.get_setting(self.HARDWARE_VERSION_ADDR)
+        version_info = "Hardware Version: "
+        if hw_version is not None:
+            # Look up the version string in the mapping
+            if hw_version in self.HARDWARE_VERSION_MAP:
+                version_info += self.HARDWARE_VERSION_MAP[hw_version]
+            else:
+                version_info += "0x%02x (Unknown)" % hw_version
+        else:
+            version_info += "Unknown"
+        
+        # Combine all information
+        return mode_info + "\n" + model_info + "\n" + version_info
 
     def query(self, data, timeout=100):
         """Blocking query"""

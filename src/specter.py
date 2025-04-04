@@ -497,8 +497,9 @@ class Specter:
             (None, "Categories")
         ] + [
             (1, "Communication"),
-            # (2, "Applications"),
-            # (3, "Experimental"),
+            #(2, "Applications"),
+            (3, "Experimental"),
+            (4, "Device Info")
         ] + [
             (None, "Global settings"),
         ]
@@ -518,6 +519,8 @@ class Specter:
                 return
             elif menuitem == 3:
                 await self.experimental_settings()
+            elif menuitem == 4:
+                await self.device_info_settings()
             elif menuitem == 456:
                 if await self.gui.prompt(
                     "Reboot the device?",
@@ -543,6 +546,47 @@ class Specter:
             else:
                 print(menuitem)
                 raise SpecterError("Not implemented")
+            
+    async def device_info_settings(self):
+        # Implement your settings screen here
+        # For example:
+        buttons = [
+            (None, "Communication channels")
+        ] + [
+            (host, host.settings_button)
+            for host in self.hosts
+            if host.settings_button is not None
+        ]
+        
+        while True:
+            menuitem = await self.gui.menu(buttons,
+                                    title="Device Information",
+                                    last=(255, "Back")
+            )
+            if menuitem == 255:
+                return
+            elif isinstance(menuitem, Host):  # Check if the selected item is a host
+                host = menuitem
+                try:
+                    # Try to access the info property
+                    if hasattr(host, "info") and host.info is not None:
+                        # Display the host info
+                        await self.gui.alert(
+                            host.settings_button + " Info", 
+                            host.info
+                        )
+                    else:
+                        # Handle case where info property doesn't exist or is None
+                        await self.gui.alert(
+                            "No Information", 
+                            "No information available for " + host.settings_button
+                        )
+                except Exception as e:
+                    # Handle any other errors that might occur
+                    await self.gui.error(
+                        "Error retrieving information for " + host.settings_button + ": " + str(e),
+                        popup=True
+                    )
 
     @property
     def fingerprint(self):
