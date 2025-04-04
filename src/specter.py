@@ -497,11 +497,12 @@ class Specter:
             (None, "Categories")
         ] + [
             (1, "Communication"),
-            # (2, "Applications"),
-            # (3, "Experimental"),
+            #(2, "Applications"),
+            (3, "Experimental"),
         ] + [
             (None, "Global settings"),
         ]
+        buttons.extend([(789, "Change Language")])
         if hasattr(self.keystore, "lock"):
             buttons.extend([(777, "Change PIN code")])
         buttons += [
@@ -514,7 +515,9 @@ class Specter:
                                       note="Firmware version %s" % get_version(),
                                       last=(255, None)
             )
-            if menuitem == 255:
+            if menuitem == 789:
+                await self.change_language()
+            elif menuitem == 255:
                 return
             elif menuitem == 3:
                 await self.experimental_settings()
@@ -543,6 +546,58 @@ class Specter:
             else:
                 print(menuitem)
                 raise SpecterError("Not implemented")
+
+    async def change_language(self):
+        # Define available languages
+        languages = [
+            ("en", "English"),
+            ("de", "Deutsch")
+        ]
+        
+        # Get current language or default to English
+        current_lang = self.GLOBAL.get("language", "en")
+        
+        # Find the current language name
+        current_lang_name = "English"  # Default
+        for code, name in languages:
+            if code == current_lang:
+                current_lang_name = name
+                break
+        
+        # Create buttons array with a section title showing current language
+        buttons = [
+            (None, "Current language: " + current_lang_name)  # Section title showing current language
+        ]
+        
+        # Add language options
+        buttons.extend(languages)
+        
+        # Show language selection menu
+        selected = await self.gui.menu(
+            buttons=buttons,
+            title="Select Language",
+            last=(255, None)
+        )
+        
+        if selected == 255:  # Back button pressed
+            return
+
+            
+        # Update settings
+        settings = self.GLOBAL.copy()  # Copy existing settings
+        settings["language"] = selected  # Add/update language setting
+        
+        # Save settings
+        self.GLOBAL = settings
+        BaseApp.GLOBAL = settings
+        self.save_settings(settings)
+        
+        # Show confirmation
+        language_name = next(name for code, name in languages if code == selected)
+        await self.gui.alert("Language Changed", "Language set to " + language_name)
+
+
+
 
     @property
     def fingerprint(self):
