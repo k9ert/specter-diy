@@ -2,7 +2,7 @@ from .core import Host, HostError
 import pyb
 import time
 import asyncio
-from platform import simulator, config, delete_recursively
+from platform import simulator, config, delete_recursively, file_exists
 import gc
 from gui.screens.settings import HostSettings
 from gui.screens import Alert
@@ -41,6 +41,8 @@ which happens if we scan a different qr code. """
 DELAY_OF_SAME_BARCODES_ADDR = b"\x00\x13"
 DELAY_OF_SAME_BARCODES = 0x85  # 5 seconds
 
+# Instead of using environment variables, check for a config file
+SIMULATOR_QR_PORT_FILE = "qr_port.txt"
 
 class QRHost(Host):
     """
@@ -69,8 +71,35 @@ class QRHost(Host):
 
         if simulator:
             self.EOL = b"\r\n"
+            # Check for external serial port configuration
+            self.external_serial = None
+            simulator_port = None
+            
+            # Try to read port from config file
+            try:
+                if file_exists(SIMULATOR_QR_PORT_FILE):
+                    with open(SIMULATOR_QR_PORT_FILE, "r") as f:
+                        simulator_port = f.read().strip()
+                        print("Using external QR scanner on port %s" % simulator_port)
+            except:
+                pass
+                
+            # Use external serial port if specified
+            if simulator_port:
+                # try:
+                import serial
+                self.external_serial = serial.Serial(simulator_port, baudrate, timeout=0.1)
+                print("Connected to external QR scanner on port %s" % simulator_port)
+                # except Exception as e:
+                #     print("Failed to connect to external QR scanner: " ,e)
+                #     self.external_serial = None
+                #     print("Connect to 127.0.0.1:22849 to send QR code content")
+            else:
+                print("Connect to 127.0.0.1:22849 to send QR code content")
+                print("To use an external QR scanner, create a file 'qr_port.txt' with the port name")
         else:
             self.EOL = b"\r"
+            self.external_serial = None
 
         self.f = None
         self.uart_bus = uart
@@ -299,24 +328,66 @@ class QRHost(Host):
             self.configure()
             await show_screen(Alert("Success!", "\n\nSettings updated!", button_text="Close"))
 
+    # Add method to read from external serial port in simulator mode
+    def read_external_serial(self):
+        if not simulator or not self.external_serial:
+            return None
+        
+        try:
+            # Check if there's data available
+            if self.external_serial.in_waiting > 0:
+                data = self.external_serial.read(self.external_serial.in_waiting)
+                if data:
+                    # Format data similar to how the internal scanner would
+                    return data + self.EOL
+            return None
+        except Exception as e:
+            print("Error reading from external scanner: %s" % str(e))
+            return None
+
     def clean_uart(self):
+        if simulator and self.external_serial:
+            try:
+                self.external_serial.reset_input_buffer()
+            except:
+                pass
         self.uart.read()
 
     def _stop_scanner(self):
-        if self.trigger is not None:
+        if simulator and self.external_serial:
+            try:
+                # Send command to stop scanning
+                self.external_serial.write(b"\x7E\x00\x08\x01\x00\x02\x00\xAB\xCD")
+            except Exception as e:
+                print("Error stopping external scanner: %s" % str(e))
+        elif self.trigger is not None:
             self.trigger.on() # trigger is reversed, so on means disable
         else:
             self.set_setting(SCAN_ADDR, 0)
 
     def _start_scanner(self):
         self.clean_uart()
-        if self.trigger is not None:
+        if simulator and self.external_serial:
+            try:
+                # Send scan command to external scanner
+                self.external_serial.write(b"\x7E\x00\x08\x01\x00\x02\x01\xAB\xCD")
+            except Exception as e:
+                print("Error starting external scanner: %s" % str(e))
+        elif self.trigger is not None:
             self.trigger.off()
         else:
             self.set_setting(SCAN_ADDR, 1)
 
     async def _restart_scanner(self):
-        if self.trigger is not None:
+        if simulator and self.external_serial:
+            try:
+                # Stop and start the scanner
+                self.external_serial.write(b"\x7E\x00\x08\x01\x00\x02\x00\xAB\xCD")
+                await asyncio.sleep_ms(30)
+                self.external_serial.write(b"\x7E\x00\x08\x01\x00\x02\x01\xAB\xCD")
+            except Exception as e:
+                print("Error restarting external scanner: %s" % str(e))
+        elif self.trigger is not None:
             self.trigger.on()
             await asyncio.sleep_ms(30)
             self.trigger.off()
@@ -390,7 +461,41 @@ class QRHost(Host):
         if not self.scanning:
             self.clean_uart()
             return
-        # read all available data
+            
+        # Check external serial port first if in simulator mode
+        if simulator and self.external_serial:
+            external_data = self.read_external_serial()
+            if external_data:
+                # Process the data from external scanner
+                if not self.animated:
+                    if not self.check_animated(external_data):
+                        if external_data[-len(self.EOL):] == self.EOL:
+                            external_data = external_data[:-len(self.EOL)]
+                        self._stop_scanner()
+                        fname = self.path + "/data.txt"
+                        with open(fname, "wb") as fout:
+                            fout.write(external_data)
+                        self.stop_scanning()
+                        return
+                
+                # Write data to temporary file
+                with open(self.tmpfile, "ab") as f:
+                    f.write(external_data)
+                
+                # Process the chunk if it's complete
+                if external_data[-len(self.EOL):] == self.EOL:
+                    try:
+                        if self.process_chunk():
+                            self.stop_scanning()
+                    except Exception as e:
+                        self.stop_scanning()
+                        raise e
+                    # Erase the content of the file
+                    with open(self.tmpfile, "wb") as f:
+                        pass
+                return
+                
+        # Original code for internal UART
         if self.uart.any() > 0:
             if not self.animated: # read only one QR code
                 # let all data to come on the first QR code
@@ -669,3 +774,5 @@ class QRHost(Host):
         if not self.animated:
             return 0
         return [part is not None for part in self.parts]
+
+
