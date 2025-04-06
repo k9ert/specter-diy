@@ -123,7 +123,6 @@ class QRHost(Host):
         
         # Get all settings
         settings = [
-            ("Mode", SETTINGS_ADDR),
             ("Product Model", PRODUCT_MODEL_ADDR),
             ("Hardware Version", HARDWARE_VERSION_ADDR),
             ("Software Version", SOFTWARE_VERSION_ADDR),
@@ -135,10 +134,9 @@ class QRHost(Host):
         for name, addr in settings:
             val = self.get_setting(addr)
             if val is not None:
-                info.append(name+ ": "+ "0x"+val.hex())
+                info.append(name + ": 0x%02x" % val)
             else:
-                info.append(name + " not available")
-                
+                info.append(name + ": not available")
         return "QR\n" + "\n".join(info)
     
     def query(self, data, timeout=100):
