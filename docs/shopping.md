@@ -47,10 +47,10 @@ Unless you build your own communication module that uses something else instead 
 ## Enclosures
 
 We have several options here(./enclosures). You can print your own or buy one at:
-* https://clavastack.com/produkte/ (germany)
-* https://copiaro.com/specter-diy-case (germany)
-* https://cryptoguide.tips/product/specter-shield-case/ (the new Shield case)
-* google others
+* https://cryptoguide.tips/shop (amer)
+* https://clavastack.com/produkte/ (emea / germany)
+* https://copiaro.com/specter-diy-case (emea / germany) / old seedsigner cases)
+* maybe there are others, google it!
 
 Make sure to check to have the right one for your project. Check the enclosures to be sure to order the right one.
 
