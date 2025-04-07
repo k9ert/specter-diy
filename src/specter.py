@@ -13,6 +13,7 @@ from platform import (
     get_battery_status,
 )
 from hosts import Host, HostError
+from hosts.core import has_broken_camera_host
 from app import BaseApp
 from embit import bip39
 from embit.liquid.networks import NETWORKS
@@ -252,6 +253,9 @@ class Specter:
             mnemonic = " ".join([bip39.WORDLIST[int(data[4*i:4*i+4])] for i in range(len(data)//4)])
         # binary mnemonic
         elif len(data) >= 16 and len(data) <= 32:
+            if hasattr(host, "is_scanner_compact_seed_broken"):
+                if host.is_scanner_compact_seed_broken():
+                    raise SpecterError("This scanner is broken for Compact Seed QRs. Please use another scanner.")
             mnemonic = bip39.mnemonic_from_bytes(data)
         # text mnemonic
         else:
@@ -363,7 +367,7 @@ class Specter:
             self.keystore.set_mnemonic(password=pwd)
             self.init_apps()
         elif menuitem == 3:
-            await self.keystore.show_mnemonic()
+            await self.keystore.show_mnemonic(has_broken_camera_host(self.hosts))
         elif menuitem == 4:
             await self.update_devsettings()
         elif menuitem == 5:

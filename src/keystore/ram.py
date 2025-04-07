@@ -364,7 +364,7 @@ class RAMKeyStore(KeyStore):
             Alert("Success!", "PIN code is successfully changed!", button_text="OK")
         )
 
-    async def show_mnemonic(self):
+    async def show_mnemonic(self, has_broken_camera_host):
         if not await self.show(Prompt("Warning",
                                   "You need to confirm your PIN code "
                                   "to display your recovery phrase.\n\n"
@@ -376,7 +376,7 @@ class RAMKeyStore(KeyStore):
             v = await self.show(ExportMnemonicScreen(self.mnemonic))
             if v == ExportMnemonicScreen.QR:
                 v = await self.show(
-                        Menu([(1, "SeedQR (digits)"), (2, "Compact SeedQR (binary)"), (3, "Plaintext")],
+                        Menu([(1, "SeedQR (digits)")] + ([] if has_broken_camera_host else [(2, "Compact SeedQR (binary)")]) + [(3, "Plaintext")],
                         last=(255, None),
                         title="Select encoding format",
                         note="Compact QR is smaller but not human-readable\n")

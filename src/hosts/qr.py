@@ -109,8 +109,7 @@ class QRHost(Host):
     
 
 
-    @property
-    def info(self):
+    def get_info(self):
         # Add these constants at the top of the file with the other address constants
         PRODUCT_MODEL_ADDR = b"\x00\xE0"
         HARDWARE_VERSION_ADDR = b"\x00\xE1"
@@ -118,8 +117,6 @@ class QRHost(Host):
         SOFTWARE_YEAR_ADDR = b"\x00\xE3"
         SOFTWARE_MONTH_ADDR = b"\x00\xE4"
         SOFTWARE_DAY_ADDR = b"\x00\xE5"
-        
-        info = []
         
         # Get all settings
         settings = [
@@ -131,13 +128,41 @@ class QRHost(Host):
             ("Software Day", SOFTWARE_DAY_ADDR),
         ]
         
+        info = {}
         for name, addr in settings:
+            try:
+                val = self.get_setting(addr)
+                if val is not None:
+                    info[name] = "0x%02x" % val
+                else:
+                    info[name] = "not available"
+            except Exception as e:
+                info[name] = "error: " + str(e)
             val = self.get_setting(addr)
             if val is not None:
-                info.append(name + ": 0x%02x" % val)
+                info[name] = "0x%02x" % val
             else:
-                info.append(name + ": not available")
-        return "QR\n" + "\n".join(info)
+                info[name] = "not available"
+        return info
+    
+    @property
+    def info(self):
+        info = self.get_info()        
+        info_text = "Product Model: " + info["Product Model"] + "\n" + \
+                    "Hardware Version: " + info["Hardware Version"] + "\n"+ \
+                    "Software Version: " + info["Software Version"] + "\n"
+        info_text += "Y / M / D  :  "+ info["Software Year"] + " / " + info["Software Month"] + " / " + info["Software Day"]    
+        return info_text
+    
+    def is_scanner_compact_seed_broken(self):
+        # see https://github.com/cryptoadvance/specter-diy/issues/288
+        info = self.get_info()
+        is_broken = info["Product Model"] == "0x02" and \
+                info["Hardware Version"] == "0x64" and \
+                info["Software Version"] == "0x69" and \
+                info["Software Year"] == "0x17"
+        return is_broken
+        
     
     def query(self, data, timeout=100):
         """Blocking query"""
