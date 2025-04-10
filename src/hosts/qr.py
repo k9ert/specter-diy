@@ -107,10 +107,14 @@ class QRHost(Host):
     def CONT_MODE(self):
         return self.MASK | 2
     
+    # https://github.com/cryptoadvance/specter-diy/issues/288#issuecomment-2599149943
+    # Add these constants at the top of the file with the other address constants
+    PRODUCT_MODEL_ADDR = b"\x00\xE0"
+    HARDWARE_VERSION_ADDR = b"\x00\xE1"
 
 
     def get_info(self):
-        # Add these constants at the top of the file with the other address constants
+        # https://github.com/cryptoadvance/specter-diy/issues/288#issuecomment-2599149943
         PRODUCT_MODEL_ADDR = b"\x00\xE0"
         HARDWARE_VERSION_ADDR = b"\x00\xE1"
         SOFTWARE_VERSION_ADDR = b"\x00\xE2"
