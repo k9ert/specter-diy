@@ -8,6 +8,15 @@ from gui.screens import Alert
 class HostError(BaseError):
     NAME = "Host error"
 
+def has_broken_camera_host(hosts):
+    """
+    Check if any of the hosts has a broken camera
+    see https://github.com/cryptoadvance/specter-diy/issues/288
+    """
+    for host in hosts:
+        if hasattr(host, "is_scanner_compact_seed_broken"):
+            return host.is_scanner_compact_seed_broken()
+    return False
 
 class Host:
     """

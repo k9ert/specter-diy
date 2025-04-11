@@ -21,13 +21,14 @@ You can start using Specter even without any extra components, but you will be a
 
 ## QR scanner
 
-For QR code scanner you have several options.
+In general, the QR scanner is optional. The best option is from Waveshare.
 
 **Option 1. Recommended.** Resonably good scanner from Waveshare (40$)
 
 [Waveshare scanner](https://www.waveshare.com/barcode-scanner-module.htm) - you will need to find a way how to mount it nicely, maybe use some kind of Arduino Prototype shield and some ducktape. For wiring see [assembly.md](./assembly.md).
 
-No soldering required, but if you have soldering skills you can make the wallet way nicer ;)
+Unfortunatley there have been a scanning issue specifically with CompactSeed QRs with some specific model which are no longer sold. See [this issue](https://github.com/cryptoadvance/specter-diy/issues/288) for more details.
+I don't think one can detect the broken models prior to purchase but maybe it's a good idea to check the camera after purchase.
 
 **Option 2.** Very nice scanner from Mikroe but pretty expensive (150$):
 
@@ -42,6 +43,17 @@ You can find some cheap scanners in China. Their quality is often not that great
 Then you can only use Specter with USB / SD Card.
 
 Unless you build your own communication module that uses something else instead of QR codes - audiomodem, bluetooth or whatever else. As soon as it can be triggered and send the data over serial you can do whatever you want.
+
+## Enclosures
+
+We have several options here(./enclosures). You can print your own or buy one at:
+* https://cryptoguide.tips/shop (amer)
+* https://clavastack.com/produkte/ (emea / germany)
+* https://copiaro.com/specter-diy-case (emea / germany) / old seedsigner cases)
+* maybe there are others, google it!
+
+Make sure to check to have the right one for your project. Check the enclosures to be sure to order the right one.
+
 
 ## Optional components
 
