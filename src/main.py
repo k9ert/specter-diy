@@ -10,6 +10,7 @@ from hosts import SDHost, QRHost, USBHost, Host
 import platform
 from helpers import load_apps
 from app import BaseApp
+import i18n
 import display
 
 def main(apps=None, network="main", keystore_cls=None):
@@ -75,6 +76,8 @@ def main(apps=None, network="main", keystore_cls=None):
         settings_path=settings_path,
         network=network,
     )
+    i18n.specter = specter
+    i18n.load_language()
     specter.start()
 
 

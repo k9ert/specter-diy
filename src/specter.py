@@ -3,6 +3,7 @@ import gc
 import json
 from io import BytesIO
 import asyncio
+from i18n import t, load_language, get_available_languages
 
 from platform import (
     CriticalErrorWipeImmediately,
@@ -191,14 +192,14 @@ class Specter:
         # If ID is None - it is a section title, not a button
         buttons = [
             # id, text
-            (None, "Key management"),
-            (0, "Generate new key"),
-            (1, "Enter recovery phrase"),
-            (777, "Import recovery phrase"),
+            (None, t("Key management")),
+            (0, t("Generate new key")),
+            (1, t("Enter recovery phrase")),
+            (777, t("Import recovery phrase")),
         ]
         if self.keystore.is_key_saved and self.keystore.load_button:
             buttons.append((2, self.keystore.load_button))
-        buttons += [(None, "Settings"), (3, "Device settings")]
+        buttons += [(None, t("Settings")), (3, t("Device settings"))]
         # wait for menu selection
         menuitem = await self.gui.menu(buttons)
 
@@ -549,10 +550,7 @@ class Specter:
 
     async def change_language(self):
         # Define available languages
-        languages = [
-            ("en", "English"),
-            ("de", "Deutsch")
-        ]
+        languages = get_available_languages()
         
         # Get current language or default to English
         current_lang = self.GLOBAL.get("language", "en")
@@ -590,6 +588,7 @@ class Specter:
         # Save settings
         self.GLOBAL = settings
         BaseApp.GLOBAL = settings
+        load_language()
         self.save_settings(settings)
         
         # Show confirmation
