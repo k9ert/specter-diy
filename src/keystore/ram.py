@@ -88,7 +88,9 @@ class RAMKeyStore(KeyStore):
         return ec.Signature(sig[:64]), flag
 
     def save_aead(self, path, adata=b"", plaintext=b"", key=None):
-        """Encrypts and saves plaintext and associated data to file"""
+        """ Encrypts and saves plaintext and associated data to file
+            Authenticated Encryption with Associated Data (AEAD)
+        """
         if key is None:
             key = self.idkey
         if key is None:
@@ -101,6 +103,7 @@ class RAMKeyStore(KeyStore):
     def load_aead(self, path, key=None):
         """
         Loads data saved with save_aead,
+        Authenticated Encryption with Associated Data (AEAD)
         returns a tuple (associated data, plaintext)
         """
         if key is None:
