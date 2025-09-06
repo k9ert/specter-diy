@@ -21,7 +21,7 @@ mpy-cross: $(TARGET_DIR) $(MPY_DIR)/mpy-cross/Makefile
 	@echo Building cross-compiler
 	make -C $(MPY_DIR)/mpy-cross \
 	DEBUG=$(DEBUG) && \
-	cp $(MPY_DIR)/mpy-cross/build/mpy-cross $(TARGET_DIR)
+	cp $(MPY_DIR)/mpy-cross/mpy-cross $(TARGET_DIR)
 
 # disco board with bitcoin library
 disco: $(TARGET_DIR) mpy-cross $(MPY_DIR)/ports/stm32
@@ -64,7 +64,7 @@ unix: $(TARGET_DIR) mpy-cross $(MPY_DIR)/ports/unix
 	make -C $(MPY_DIR)/ports/unix \
 		USER_C_MODULES=$(USER_C_MODULES) \
 		FROZEN_MANIFEST=$(FROZEN_MANIFEST_UNIX) \
-		CFLAGS_EXTRA='-DMP_CONFIGFILE="<mpconfigport_specter.h>"' && \
+		# CFLAGS_EXTRA='-DMP_CONFIGFILE="<mpconfigport_specter.h>"' && \
 	cp $(MPY_DIR)/ports/unix/build-standard/micropython $(TARGET_DIR)/micropython_unix
 
 simulate: unix
