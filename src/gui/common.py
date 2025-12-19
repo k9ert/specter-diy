@@ -1,6 +1,6 @@
 """Some commonly used functions, like helpers"""
 import lvgl as lv
-import qrcode
+#import qrcode
 import math
 from micropython import const
 import gc
